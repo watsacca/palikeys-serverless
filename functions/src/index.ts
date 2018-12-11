@@ -23,18 +23,21 @@ main.use(bodyParser.json());
 main.set('x-powered-by', false);
 app.set('x-powered-by', false);
 
+export const webApi = functions.https.onRequest(main);
+
+// FIXME: how to make CORS work with firebase functions???
 // webApi is our firebase functions name
-export const webApi = (req, res) => {
-  return cors(corsOptions)(req, res, () => {
-    functions.https.onRequest(main);
-  });
-};
+// export const webApi = (req, res) => {
+//   return cors(corsOptions)(req, res, () => {
+//     webApiFn(req, res);
+//   });
+// };
 
 
 // FIXME: don't use internal db ids, but uuid v4!
 // TODO: validate input with AJV
 // TODO: ensure no duplicate username!
-// TODO: remove firebase-functions-helper
+// TODO: remove
 
 app.get('/score', (req, res) => {
   firebaseHelper.firestore
