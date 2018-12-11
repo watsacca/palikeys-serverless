@@ -40,23 +40,21 @@ app.post('/score', (req, res) => {
   const obj = req.body;
   obj.id = uuid();
   firebaseHelper.firestore
-    .createNewDocument(db, scoreCollection, obj)
-    .then(doc => {
-      res.setHeader('Location', `/api/score/${doc.id}`);
-      res.status(204);
-    });
+    .createNewDocument(db, scoreCollection, obj);
+  res.setHeader('Location', `/api/score/${obj.id}`);
+  res.status(204);
 });
 
 app.patch('/score/:id', (req, res) => {
   firebaseHelper.firestore
-    .updateDocument(db, scoreCollection, req.params.id, req.body)
-    .then(() => res.sendStatus(204));
+    .updateDocument(db, scoreCollection, req.params.id, req.body);
+  res.sendStatus(204);
 });
 
 app.delete('/score/:id', (req, res) => {
   firebaseHelper.firestore
-    .deleteDocument(db, scoreCollection, req.params.id)
-    .then(() => res.sendStatus(200));
+    .deleteDocument(db, scoreCollection, req.params.id);
+    res.sendStatus(200);
 });
 
 app.get('*', (req, res) => {
