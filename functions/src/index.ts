@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import * as firebaseHelper from 'firebase-functions-helper';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as uuid from 'uuid/v4';
 
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
@@ -14,19 +15,19 @@ main.use('/api', app);
 main.use(bodyParser.json());
 main.use(bodyParser.urlencoded({extended: false}));
 
+main.set('x-powered-by', false);
+app.set('x-powered-by', false);
+
 // webApi is our firebase functions name
 export const webApi = functions.https.onRequest(main);
 
-app.post('/score', (req, res) => {
-  firebaseHelper.firestore
-    .createNewDocument(db, scoreCollection, req.body);
-  res.send('Create a new high score');
-});
+// FIXME: don't use internal db ids, but uuid v4!
+// TODO: validate input with AJV
 
-app.put('/score/:id', (req, res) => {
+app.get('/score', (req, res) => {
   firebaseHelper.firestore
-    .updateDocument(db, scoreCollection, req.params.id, req.body);
-  res.send('Update a high score');
+    .backup(db, scoreCollection)
+    .then(data => res.status(200).send(data.highscore))
 });
 
 app.get('/score/:id', (req, res) => {
@@ -35,16 +36,27 @@ app.get('/score/:id', (req, res) => {
     .then(doc => res.status(200).send(doc));
 });
 
-app.get('/score', (req, res) => {
+app.post('/score', (req, res) => {
+  const obj = req.body;
+  obj.id = uuid();
   firebaseHelper.firestore
-    .backup(db, scoreCollection)
-    .then(data => res.status(200).send(data))
+    .createNewDocument(db, scoreCollection, obj)
+    .then(doc => {
+      res.setHeader('Location', `/api/score/${doc.id}`);
+      res.status(204);
+    });
+});
+
+app.patch('/score/:id', (req, res) => {
+  firebaseHelper.firestore
+    .updateDocument(db, scoreCollection, req.params.id, req.body)
+    .then(() => res.sendStatus(204));
 });
 
 app.delete('/score/:id', (req, res) => {
   firebaseHelper.firestore
-    .deleteDocument(db, scoreCollection, req.params.id);
-  res.send('Document deleted');
+    .deleteDocument(db, scoreCollection, req.params.id)
+    .then(() => res.sendStatus(200));
 });
 
 app.get('*', (req, res) => {
