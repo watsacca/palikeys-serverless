@@ -33,10 +33,15 @@ export const webApi = functions.https.onRequest(main);
 // TODO: ensure no duplicate username!
 // TODO: remove firebase-functions-helper package
 
+
 app.get('/score', (req, res) => {
+  function toArray(scores: any) {
+    return Object.keys(scores).map(key => scores[key]);
+  }
+
   firebaseHelper.firestore
     .backup(db, scoreCollection)
-    .then(data => res.status(200).send(data.highscore))
+    .then(data => res.status(200).send(toArray(data.highscore)))
 });
 
 app.get('/score/:id', (req, res) => {
