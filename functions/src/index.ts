@@ -4,6 +4,7 @@ import * as firebaseHelper from 'firebase-functions-helper';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as uuid from 'uuid/v4';
+import * as cors from 'cors';
 
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
@@ -11,18 +12,29 @@ const app = express();
 const main = express();
 const scoreCollection = 'highscore';
 
+const corsOptions = {
+  origin: 'https://palikeys.firebaseapp.com',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
 main.use('/api', app);
 main.use(bodyParser.json());
-main.use(bodyParser.urlencoded({extended: false}));
 
 main.set('x-powered-by', false);
 app.set('x-powered-by', false);
 
 // webApi is our firebase functions name
-export const webApi = functions.https.onRequest(main);
+export const webApi = (req, res) => {
+  return cors(corsOptions)(req, res, () => {
+    functions.https.onRequest(main);
+  });
+};
+
 
 // FIXME: don't use internal db ids, but uuid v4!
 // TODO: validate input with AJV
+// TODO: ensure no duplicate username!
+// TODO: remove firebase-functions-helper
 
 app.get('/score', (req, res) => {
   firebaseHelper.firestore
