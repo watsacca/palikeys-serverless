@@ -1,6 +1,6 @@
 # Palikeys Serverless
 
-Small firebase function project to provide a REST interface for the
+Small firebase functions project to provide a REST interface for the
 [Palikeys Webapp](https://github.com/notfb/palikeys).
 
 This project is primarily offered as a gift to the Buddhist Monastic Community
