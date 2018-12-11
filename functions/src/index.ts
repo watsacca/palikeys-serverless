@@ -14,8 +14,7 @@ main.use('/api', app);
 main.use(bodyParser.json());
 main.use(bodyParser.urlencoded({extended: false}));
 
-// webApi is your functions name, and you will pass main as
-// a parameter
+// webApi is our firebase functions name
 export const webApi = functions.https.onRequest(main);
 
 app.post('/score', (req, res) => {
@@ -48,3 +47,12 @@ app.delete('/score/:id', (req, res) => {
   res.send('Document deleted');
 });
 
+app.get('*', (req, res) => {
+  res.status(404);
+  res.json({error: 'not found'})
+});
+
+app.use((req, res) => {
+  res.status(404);
+  res.json({error: 'not found'})
+});
