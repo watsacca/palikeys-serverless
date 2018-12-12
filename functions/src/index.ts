@@ -62,13 +62,6 @@ app.post('/score', (req, res) => {
   res.status(204);
 });
 
-// TODO: remove
-app.patch('/score/:id', (req, res) => {
-  firebaseHelper.firestore
-    .updateDocument(db, scoreCollection, req.params.id, req.body);
-  res.sendStatus(204);
-});
-
 app.put('/score/:id/increment', async (req, res) => {
   const obj = req.body;
   if (!validateScoreIncrement(obj, res)) {
