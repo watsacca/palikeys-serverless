@@ -52,6 +52,9 @@ app.get('/score/:id', (req, res) => {
 
 app.post('/score', (req, res) => {
   const obj = req.body;
+  if (!validateScore(obj, res)) {
+    return;
+  }
   obj.id = uuid();
   firebaseHelper.firestore
     .createNewDocument(db, scoreCollection, obj);
@@ -59,9 +62,23 @@ app.post('/score', (req, res) => {
   res.status(204);
 });
 
+// TODO: remove
 app.patch('/score/:id', (req, res) => {
   firebaseHelper.firestore
     .updateDocument(db, scoreCollection, req.params.id, req.body);
+  res.sendStatus(204);
+});
+
+app.put('/score/:id/increment', async (req, res) => {
+  const obj = req.body;
+  if (!validateScoreIncrement(obj, res)) {
+    return;
+  }
+  const doc = await firebaseHelper.firestore
+    .getDocument(db, scoreCollection, req.params.id);
+  doc.score += obj.score;
+  firebaseHelper.firestore
+    .updateDocument(db, scoreCollection, req.params.id, doc);
   res.sendStatus(204);
 });
 
@@ -80,3 +97,21 @@ app.use((req, res) => {
   res.status(404);
   res.json({error: 'not found'})
 });
+
+function validateScore(obj, res): boolean {
+  if (Object.keys(obj) !== ['username', 'score'] || typeof obj.score !== 'number' || typeof obj.username !== 'string') {
+    res.status(400);
+    res.json({error: 'Invalid json object, only attributes score (number) and username (string) are allowed!'});
+    return false;
+  }
+  return true;
+}
+
+function validateScoreIncrement(obj, res) {
+  if (Object.keys(obj) !== ['score'] || typeof obj.score !== 'number' || obj.score < 0) {
+    res.status(400);
+    res.json({error: 'Invalid json object, only attribute score (positive number) is allowed!'});
+    return false;
+  }
+  return true;
+}
