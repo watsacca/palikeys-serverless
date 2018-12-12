@@ -31,12 +31,16 @@ export const webApi = functions.https.onRequest(main);
 // FIXME: don't use internal db ids, but uuid v4!
 // TODO: ensure no duplicate username!
 // TODO: remove firebase-functions-helper package
-// TODO: unit test with supertest
 // TODO: validate input with AJV
 
 app.get('/score', (req, res) => {
-  function toArray(scores: any) {
-    return Object.keys(scores).map(key => scores[key]);
+  // TODO: let the db sort by score
+  function sortByScore(a: {score: number}, b: {score: number}): number {
+    return b.score - a.score;
+  }
+
+  function toArray(scores: any): any[] {
+    return Object.keys(scores).map(key => scores[key]).sort(sortByScore);
   }
 
   firebaseHelper.firestore
