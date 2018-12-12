@@ -95,7 +95,7 @@ function validateScore(obj, res): boolean {
   if (Object.keys(obj) !== ['username', 'score'] || typeof obj.score !== 'number' || typeof obj.username !== 'string') {
     res.status(400);
     res.json({
-      error: 'Invalid json object, only attributes score (number) and username (string) are allowed!',
+      error   : 'Invalid json object, only attributes score (number) and username (string) are allowed!',
       received: obj
     });
     return false;
@@ -107,7 +107,7 @@ function validateScoreIncrement(obj, res) {
   if (Object.keys(obj) !== ['score'] || typeof obj.score !== 'number' || obj.score < 0) {
     res.status(400);
     res.json({
-      error: 'Invalid json object, only attribute score (positive number) is allowed!',
+      error   : 'Invalid json object, only attribute score (positive number) is allowed!',
       received: obj
     });
     return false;
