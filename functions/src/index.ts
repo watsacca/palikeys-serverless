@@ -103,7 +103,7 @@ function validateScore(obj, res): boolean {
 function validateScoreIncrement(obj, res) {
   if (Object.keys(obj) !== ['score'] || typeof obj.score !== 'number' || obj.score < 0) {
     res.status(400);
-    res.json({error: 'Invalid json object, only attribute score (positive number) is allowed!'});
+    res.json({error: 'Invalid json object, only attribute score (positive number) is allowed! Got: ' + Object.keys(obj)});
     return false;
   }
   return true;
