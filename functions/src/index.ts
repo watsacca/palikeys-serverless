@@ -29,10 +29,10 @@ app.set('x-powered-by', false);
 export const webApi = functions.https.onRequest(main);
 
 // FIXME: don't use internal db ids, but uuid v4!
-// TODO: validate input with AJV
 // TODO: ensure no duplicate username!
 // TODO: remove firebase-functions-helper package
-
+// TODO: unit test with supertest
+// TODO: validate input with AJV
 
 app.get('/score', (req, res) => {
   function toArray(scores: any) {
