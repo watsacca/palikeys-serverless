@@ -94,7 +94,10 @@ app.use((req, res) => {
 function validateScore(obj, res): boolean {
   if (Object.keys(obj) !== ['username', 'score'] || typeof obj.score !== 'number' || typeof obj.username !== 'string') {
     res.status(400);
-    res.json({error: 'Invalid json object, only attributes score (number) and username (string) are allowed!'});
+    res.json({
+      error: 'Invalid json object, only attributes score (number) and username (string) are allowed!',
+      received: obj
+    });
     return false;
   }
   return true;
