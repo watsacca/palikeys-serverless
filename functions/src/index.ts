@@ -13,7 +13,7 @@ const main = express();
 const scoreCollection = 'highscore';
 
 const corsOptions = {
-  origin: 'https://palikeys.firebaseapp.com',
+  origin              : 'https://palikeys.firebaseapp.com',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
@@ -78,7 +78,7 @@ app.put('/score/:id/increment', async (req, res) => {
 app.delete('/score/:id', (req, res) => {
   firebaseHelper.firestore
     .deleteDocument(db, scoreCollection, req.params.id);
-    res.sendStatus(200);
+  res.sendStatus(200);
 });
 
 app.get('*', (req, res) => {
@@ -103,7 +103,10 @@ function validateScore(obj, res): boolean {
 function validateScoreIncrement(obj, res) {
   if (Object.keys(obj) !== ['score'] || typeof obj.score !== 'number' || obj.score < 0) {
     res.status(400);
-    res.json({error: 'Invalid json object, only attribute score (positive number) is allowed! Got: ' + Object.keys(obj)});
+    res.json({
+      error: 'Invalid json object, only attribute score (positive number) is allowed!',
+      received: obj
+    });
     return false;
   }
   return true;
