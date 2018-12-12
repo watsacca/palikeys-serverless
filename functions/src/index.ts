@@ -96,6 +96,7 @@ app.use((req, res) => {
 });
 
 function validateScore(obj, res): boolean {
+  // noinspection SuspiciousTypeOfGuard
   if (!arrayEqual(Object.keys(obj), ['username', 'score']) || typeof obj.score !== 'number' || typeof obj.username !== 'string') {
     res.status(400);
     res.json({
@@ -108,6 +109,7 @@ function validateScore(obj, res): boolean {
 }
 
 function validateScoreIncrement(obj, res) {
+  // noinspection SuspiciousTypeOfGuard
   if (!arrayEqual(Object.keys(obj), ['score']) || typeof obj.score !== 'number' || obj.score < 0) {
     res.status(400);
     res.json({
