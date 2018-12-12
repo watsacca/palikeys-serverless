@@ -92,7 +92,7 @@ app.use((req, res) => {
 });
 
 function validateScore(obj, res): boolean {
-  if (Object.keys(obj) !== ['username', 'score'] || typeof obj.score !== 'number' || typeof obj.username !== 'string') {
+  if (!arrayEqual(Object.keys(obj), ['username', 'score']) || typeof obj.score !== 'number' || typeof obj.username !== 'string') {
     res.status(400);
     res.json({
       error   : 'Invalid json object, only attributes score (number) and username (string) are allowed!',
@@ -104,7 +104,7 @@ function validateScore(obj, res): boolean {
 }
 
 function validateScoreIncrement(obj, res) {
-  if (Object.keys(obj) !== ['score'] || typeof obj.score !== 'number' || obj.score < 0) {
+  if (!arrayEqual(Object.keys(obj), ['score']) || typeof obj.score !== 'number' || obj.score < 0) {
     res.status(400);
     res.json({
       error   : 'Invalid json object, only attribute score (positive number) is allowed!',
@@ -113,4 +113,8 @@ function validateScoreIncrement(obj, res) {
     return false;
   }
   return true;
+}
+
+function arrayEqual(a: any[], b: any[]): boolean {
+  return a.every( e => b.indexOf(e) > -1 );
 }
