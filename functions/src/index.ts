@@ -7,15 +7,17 @@ import * as uuid from 'uuid/v4';
 import * as cors from 'cors';
 
 admin.initializeApp(functions.config().firebase);
+
 const db = admin.firestore();
 const app = express();
 const main = express();
 const scoreCollection = 'highscore';
-
 const corsOptions = {
   origin              : 'https://palikeys.firebaseapp.com',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
+
+db.settings({timestampsInSnapshots: true});
 
 main.use('/api', app);
 main.use(bodyParser.json());
@@ -95,8 +97,9 @@ app.put('/score/:id/increment', async (req, res) => {
   }
   const score = doc.data();
   score.score += obj.score;
+  // TODO: update guard against race & retry read, update until update guard matches?
   firebaseHelper.firestore
-    .updateDocument(db, scoreCollection, req.params.id, score);
+    .updateDocument(db, scoreCollection, doc.id, score);
   res.sendStatus(204);
 });
 
@@ -107,7 +110,7 @@ app.delete('/score/:id', async (req, res) => {
   }
   firebaseHelper.firestore
     .deleteDocument(db, scoreCollection, doc.id);
-  res.sendStatus(200);
+  res.sendStatus(204);
 });
 
 app.get('*', (req, res) => {
