@@ -50,7 +50,7 @@ app.get('/score', (req, res) => {
 });
 
 app.get('/score/username/:username', async (req, res) => {
-  const snapshot = await getByUsername(req.params.username);
+  const snapshot = await getByUsername(req.params.username).get();
   if (snapshot.empty) {
     res.status(404);
     res.json({error: `username '${req.params.username}' not found`});
@@ -59,12 +59,17 @@ app.get('/score/username/:username', async (req, res) => {
   res.json(snapshot.docs[0].data());
 });
 
-app.get('/score/:id', (req, res) => {
-  firebaseHelper.firestore
-    .getDocument(db, scoreCollection, req.params.id)
-    .then(doc => res.status(200).send(doc));
+app.get('/score/:id', async (req, res) => {
+  const snapshot = await getById(req.params.id).get();
+  if (snapshot.empty) {
+    res.status(404);
+    res.json({error: `id '${req.params.id}' not found`});
+    return;
+  }
+  res.json(snapshot.docs[0].data());
 });
 
+// TODO: we need to ensure on a db level that id and username are unique
 app.post('/score', async (req, res) => {
   const obj = req.body;
   if (!validateScore(obj, res)) {
@@ -140,8 +145,12 @@ function arrayEqual(a: any[], b: any[]): boolean {
   return a.every(e => b.indexOf(e) > -1);
 }
 
-async function getByUsername(username: string) {
-  return await db.collection(scoreCollection).where('username', '==', username).get();
+function getByUsername(username: string) {
+  return db.collection(scoreCollection).where('username', '==', username);
+}
+
+function getById(id: string) {
+  return db.collection(scoreCollection).where('id', '==', id);
 }
 
 async function userExists(username: string): Promise<boolean> {
