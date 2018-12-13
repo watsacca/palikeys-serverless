@@ -28,6 +28,7 @@ app.set('x-powered-by', false);
 
 export const webApi = functions.https.onRequest(main);
 
+// TODO: generic error handler that returns json 500er
 // FIXME: don't use internal db ids, but uuid v4!
 // TODO: ensure no duplicate username!
 // TODO: remove firebase-functions-helper package
@@ -35,7 +36,7 @@ export const webApi = functions.https.onRequest(main);
 
 app.get('/score', (req, res) => {
   // TODO: let the db sort by score
-  function sortByScore(a: {score: number}, b: {score: number}): number {
+  function sortByScore(a: { score: number }, b: { score: number }): number {
     return b.score - a.score;
   }
 
@@ -49,25 +50,29 @@ app.get('/score', (req, res) => {
 });
 
 app.get('/score/username/:username', async (req, res) => {
-  const snapshot = await db.collection(scoreCollection).where('username', '==', req.params.username).get();
+  const snapshot = await getByUsername(req.params.username);
   if (snapshot.empty) {
     res.status(404);
-    res.json({error: 'username not found'});
+    res.json({error: `username '${req.params.username}' not found`});
     return;
   }
   res.json(snapshot.docs[0].data());
 });
 
 app.get('/score/:id', (req, res) => {
-    firebaseHelper.firestore
+  firebaseHelper.firestore
     .getDocument(db, scoreCollection, req.params.id)
     .then(doc => res.status(200).send(doc));
 });
 
-app.post('/score', (req, res) => {
+app.post('/score', async (req, res) => {
   const obj = req.body;
   if (!validateScore(obj, res)) {
     return;
+  }
+  if (userExists(obj.username)) {
+    res.status(409);
+    res.json({error: `user with name '${obj.username}' already exists`})
   }
   obj.id = uuid();
   firebaseHelper.firestore
@@ -132,5 +137,14 @@ function validateScoreIncrement(obj, res) {
 }
 
 function arrayEqual(a: any[], b: any[]): boolean {
-  return a.every( e => b.indexOf(e) > -1 );
+  return a.every(e => b.indexOf(e) > -1);
 }
+
+async function getByUsername(username: string) {
+  return await db.collection(scoreCollection).where('username', '==', username).get();
+}
+
+async function userExists(username: string): Promise<boolean> {
+  return !(await db.collection(scoreCollection).where('username', '==', username).get()).empty;
+}
+
