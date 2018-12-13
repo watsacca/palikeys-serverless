@@ -60,11 +60,11 @@ app.get('/score/username/:username', async (req, res) => {
 });
 
 app.get('/score/:id', async (req, res) => {
-  const score = await getByIdNonEmpty(req.params.id, res);
-  if (!score) {
+  const doc = await getByIdNonEmpty(req.params.id, res);
+  if (!doc) {
     return;
   }
-  res.json(score);
+  res.json(doc.data());
 });
 
 // TODO: we need to ensure on a db level that id and username are unique
@@ -89,19 +89,24 @@ app.put('/score/:id/increment', async (req, res) => {
   if (!validateScoreIncrement(obj, res)) {
     return;
   }
-  const score = await getByIdNonEmpty(req.params.id, res);
-  if (!score) {
+  const doc = await getByIdNonEmpty(req.params.id, res);
+  if (!doc) {
     return;
   }
+  const score = doc.data();
   score.score += obj.score;
   firebaseHelper.firestore
     .updateDocument(db, scoreCollection, req.params.id, score);
   res.sendStatus(204);
 });
 
-app.delete('/score/:id', (req, res) => {
+app.delete('/score/:id', async (req, res) => {
+  const doc = await getByIdNonEmpty(req.params.id, res);
+  if (!doc) {
+    return;
+  }
   firebaseHelper.firestore
-    .deleteDocument(db, scoreCollection, req.params.id);
+    .deleteDocument(db, scoreCollection, doc.id);
   res.sendStatus(200);
 });
 
@@ -146,11 +151,11 @@ function arrayEqual(a: any[], b: any[]): boolean {
 }
 
 function getByUsername(username: string) {
-  return db.collection(scoreCollection).where('username', '==', username);
+  return db.collection(scoreCollection).where('username', '==', username).limit(1);
 }
 
 function getById(id: string) {
-  return db.collection(scoreCollection).where('id', '==', id);
+  return db.collection(scoreCollection).where('id', '==', id).limit(1);
 }
 
 async function getByIdNonEmpty(id: string, res: express.Response) {
@@ -160,7 +165,7 @@ async function getByIdNonEmpty(id: string, res: express.Response) {
     res.json({error: `id '${id}' not found`});
     return undefined;
   }
-  return snapshot.docs[0].data();
+  return snapshot.docs[0];
 }
 
 async function userExists(username: string): Promise<boolean> {
