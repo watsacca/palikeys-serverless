@@ -31,8 +31,6 @@ app.set('x-powered-by', false);
 export const webApi = functions.https.onRequest(main);
 
 // TODO: generic error handler that returns json 500er
-// FIXME: don't use internal db ids, but uuid v4!
-// TODO: ensure no duplicate username!
 // TODO: remove firebase-functions-helper package
 // TODO: validate input with AJV
 
