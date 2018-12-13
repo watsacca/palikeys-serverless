@@ -48,8 +48,18 @@ app.get('/score', (req, res) => {
     .then(data => res.status(200).send(toArray(data.highscore)))
 });
 
+app.get('/score/username/:username', async (req, res) => {
+  const snapshot = await db.collection(scoreCollection).where('username', '==', req.params.username).get();
+  if (snapshot.empty) {
+    res.status(404);
+    res.json({error: 'username not found'});
+    return;
+  }
+  res.json(snapshot.docs[0].data());
+});
+
 app.get('/score/:id', (req, res) => {
-  firebaseHelper.firestore
+    firebaseHelper.firestore
     .getDocument(db, scoreCollection, req.params.id)
     .then(doc => res.status(200).send(doc));
 });
@@ -87,7 +97,7 @@ app.delete('/score/:id', (req, res) => {
 
 app.get('*', (req, res) => {
   res.status(404);
-  res.json({error: 'not found'})
+  res.json({error: 'resource not found'})
 });
 
 app.use((req, res) => {
