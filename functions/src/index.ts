@@ -78,7 +78,7 @@ app.post('/score', async (req, res) => {
     res.json({error: `user with name '${obj.username}' already exists`})
   }
   obj.id = uuid();
-  firebaseHelper.firestore
+  await firebaseHelper.firestore
     .createNewDocument(db, scoreCollection, obj);
   res.setHeader('Location', `/api/score/${obj.id}`);
   res.status(204);
@@ -96,7 +96,7 @@ app.put('/score/:id/increment', async (req, res) => {
   const score = doc.data();
   score.score += obj.score;
   // TODO: update guard against race & retry read, update until update guard matches?
-  firebaseHelper.firestore
+  await firebaseHelper.firestore
     .updateDocument(db, scoreCollection, doc.id, score);
   res.sendStatus(204);
 });
@@ -106,7 +106,7 @@ app.delete('/score/:id', async (req, res) => {
   if (!doc) {
     return;
   }
-  firebaseHelper.firestore
+  await firebaseHelper.firestore
     .deleteDocument(db, scoreCollection, doc.id);
   res.sendStatus(204);
 });
