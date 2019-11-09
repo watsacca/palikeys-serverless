@@ -13,7 +13,7 @@ const app = express();
 const main = express();
 const scoreCollection = 'highscore';
 const corsOptions = {
-  origin              : 'https://palikeys.firebaseapp.com',
+  origin              : 'https://palikeys2.firebaseapp.com',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
